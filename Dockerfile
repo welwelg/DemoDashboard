@@ -2,6 +2,7 @@
 FROM php:8.2-apache
 
 # 2. Install system dependencies (Linux libraries)
+# Added pdo_mysql here so you can connect to your Railway MySQL database
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
@@ -11,7 +12,7 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     libpq-dev \
-    && docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd
+    && docker-php-ext-install pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd
 
 # 3. Install Node.js (Required for Shadcn/Inertia build)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
@@ -38,6 +39,8 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 # 10. Enable Apache mod_rewrite for Laravel routes
 RUN a2enmod rewrite
 
+# --- NUCLEAR FIX FOR APACHE CRASH ---
+# This removes the conflicting modules so only 'prefork' runs.
 RUN rm -f /etc/apache2/mods-enabled/mpm_event.load \
     && rm -f /etc/apache2/mods-enabled/mpm_event.conf \
     && rm -f /etc/apache2/mods-enabled/mpm_worker.load \
@@ -49,7 +52,6 @@ ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 
-RUN sed -i "s/80/\${PORT}/g" /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf
-
-# 12. Use the default production port
-EXPOSE 8080
+# 12. USE DEFAULT PORT 80
+# We removed the 'sed' command that was breaking the port.
+EXPOSE 80
