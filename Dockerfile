@@ -2,7 +2,7 @@
 FROM php:8.2-apache
 
 # 2. Install system dependencies (Linux libraries)
-# Added pdo_mysql here so you can connect to your Railway MySQL database
+# Added pdo_mysql here para makaconnect ka sa Railway Database mo
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
@@ -40,7 +40,7 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 RUN a2enmod rewrite
 
 # --- NUCLEAR FIX FOR APACHE CRASH ---
-# This removes the conflicting modules so only 'prefork' runs.
+# Ito yung fix para hindi mag-crash ang Apache (More than one MPM loaded error)
 RUN rm -f /etc/apache2/mods-enabled/mpm_event.load \
     && rm -f /etc/apache2/mods-enabled/mpm_event.conf \
     && rm -f /etc/apache2/mods-enabled/mpm_worker.load \
@@ -53,5 +53,6 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-av
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 
 # 12. USE DEFAULT PORT 80
-# We removed the 'sed' command that was breaking the port.
+# Tinanggal na natin yung "sed" command na nakakasira.
+# Port 80 ang default ng Apache, at ito ang hahanapin ni Railway.
 EXPOSE 80
