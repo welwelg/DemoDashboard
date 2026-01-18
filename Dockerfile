@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     libpq-dev \
-    && docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd
+    && docker-php-ext-install pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd
 
 # 3. Install Node.js (Required for Shadcn/Inertia build)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
